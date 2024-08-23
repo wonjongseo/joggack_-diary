@@ -10,9 +10,7 @@ class DiaryController extends GetxController {
     update();
   }
 
-  Future<void> getSameDayDiarys(int year, int month, int day) async {
-    DateTime searchedDate = DateTime((year), (month), (day));
-
+  Future<void> getSameDayDiarys(DateTime searchedDate) async {
     diarys = await DiaryReporistory.getSameDayDatas(searchedDate);
     update();
   }

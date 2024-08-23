@@ -44,6 +44,7 @@ dependencies:
   dotted_border: ^2.1.0
   image_picker: ^1.0.8
   font_awesome_flutter: ^10.7.0
+  emoji_picker_flutter: ^2.1.1
   # google_fonts: ^6.2.0
   # flutter_svg: ^2.0.10+1
 
@@ -81,10 +82,39 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: IndieFlower
+      fonts:
+        - asset: assets/fonts/IndieFlower-Regular.ttf
+          weight: 400
+
+    - family: DMSerifText
+      fonts:
+        - asset: assets/fonts/DMSerifText-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/DMSerifText-Italic.ttf
+          weight: 600
+
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlayfairDisplay-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlayfairDisplay-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlayfairDisplay-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlayfairDisplay-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/PlayfairDisplay-Black.ttf
+          weight: 900
+
+    - family: NewAmsterdam
+      fonts:
+        - asset: assets/fonts/NewAmsterdam-Regular.ttf
+          weight: 400
+
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

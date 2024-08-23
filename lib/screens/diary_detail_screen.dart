@@ -16,16 +16,7 @@ class DiaryDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // 뒤로가기 버튼 제거
-        // centerTitle: false,
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: TodayWidget(
-            day: diary.day.toString(),
-            month: diary.month.toString(),
-            year: diary.year.toString(),
-            week: diary.weekday.toString(),
-          ),
-        ),
+        title: const TodayWidget(),
       ),
       body: Column(
         children: [
@@ -52,24 +43,133 @@ class DiaryDetailScreen extends StatelessWidget {
                 },
               ),
             ),
-          Text(
-            'Hello My Name is wonjognseo',
-          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(Responsive.width16 / 2),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Title',
+                        style: TextStyle(
+                          fontFamily: 'IndieFlower',
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: Responsive.width20,
+                        ),
+                      ),
+                      Text(
+                        diary.title,
+                        style: TextStyle(
+                          fontFamily: 'IndieFlower',
+                          fontSize: Responsive.height16,
+                        ),
+                      ),
+                      SizedBox(height: Responsive.height20),
+                      Text(
+                        'Content',
+                        style: TextStyle(
+                          fontFamily: 'IndieFlower',
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: Responsive.width20,
+                        ),
+                      ),
+                      Text(
+                        diary.content,
+                        style: TextStyle(
+                          fontFamily: 'IndieFlower',
+                          fontSize: Responsive.height16,
+                        ),
+                      ),
+                      if (diary.content2 != '') ...[
+                        SizedBox(height: Responsive.height20),
+                        Text(
+                          'Content2',
+                          style: TextStyle(
+                            fontFamily: 'IndieFlower',
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: Responsive.width20,
+                          ),
+                        ),
+                        Text(
+                          diary.content2,
+                          style: TextStyle(
+                            fontFamily: 'IndieFlower',
+                            fontSize: Responsive.height16,
+                          ),
+                        ),
+                      ]
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (index) async {
-          if (index == 0) {
-            // edit
-            await diaryController.remoteDiary(diary);
-          }
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(height: 1, color: Colors.grey),
+          BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            iconSize: Responsive.width10 * 2.4,
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            onTap: (index) async {
+              if (index == 0) {
+                String? result = await showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Container(
+                      padding: EdgeInsets.all(Responsive.width18),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          ListTile(
+                            leading: const Icon(Icons.edit),
+                            title: const Text('Edit'),
+                            onTap: () {
+                              Get.back(result: 'edit');
+                              // 수정 로직 추가
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.delete),
+                            title: const Text('Delete'),
+                            onTap: () {
+                              Get.back(result: 'delete');
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+                if (result == null) {
+                  return;
+                } else if (result == 'edit') {
+                  print('EDIT');
+                } else if (result == 'delete') {
+                  await diaryController.remoteDiary(diary);
+                  Get.back();
+                }
+              } else {
+                Get.back();
+              }
 
-          Get.back();
-          // }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.close), label: ''),
+              // }
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.close), label: ''),
+            ],
+          ),
         ],
       ),
     );
