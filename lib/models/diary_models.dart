@@ -22,7 +22,7 @@ class DiaryModel {
   final String content2;
 
   @HiveField(5)
-  List<String>? imageUrls;
+  List<Uint8List>? imageUrls;
 
   @HiveField(6)
   late int year;
@@ -38,8 +38,15 @@ class DiaryModel {
   @HiveField(11)
   late DateTime updatedAt;
 
+  @HiveField(12)
+  String? mode;
+
+  @HiveField(13, defaultValue: false)
+  bool isFavorite = false;
+
   DiaryModel({
     this.imageUrls,
+    this.mode,
     required this.title,
     required this.content,
     required this.content2,
@@ -59,7 +66,7 @@ class DiaryModel {
     String? title,
     String? content,
     String? content2,
-    List<String>? imageUrls,
+    List<Uint8List>? imageUrls,
     int? year,
     int? month,
     int? day,
@@ -93,7 +100,7 @@ class DiaryModel {
       title: map['title'] ?? '',
       content: map['content'] ?? '',
       content2: map['content2'] ?? '',
-      imageUrls: List<String>.from(map['imageUrls']),
+      imageUrls: List<Uint8List>.from(map['imageUrls']),
     );
   }
 

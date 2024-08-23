@@ -34,7 +34,7 @@ class DiaryCard extends StatelessWidget {
               color: Colors.white,
               image: diary.imageUrls != null
                   ? DecorationImage(
-                      image: AssetImage(diary.imageUrls![0]), // 이미지 경로
+                      image: MemoryImage(diary.imageUrls![0]), // 이미지 경로
                       fit: BoxFit.cover, // 이미지가 컨테이너에 가득 차도록 설정
                     )
                   : null,

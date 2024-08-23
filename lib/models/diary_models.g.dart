@@ -17,12 +17,13 @@ class DiaryModelAdapter extends TypeAdapter<DiaryModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return DiaryModel(
+      imageUrls: (fields[5] as List?)?.cast<Uint8List>(),
+      mode: fields[12] as String?,
       title: fields[2] as String,
       content: fields[3] as String,
       content2: fields[4] as String,
     )
       ..id = fields[1] as String
-      ..imageUrls = (fields[5] as List?)?.cast<String>()
       ..year = fields[6] as int
       ..month = fields[7] as int
       ..day = fields[8] as int
@@ -34,7 +35,7 @@ class DiaryModelAdapter extends TypeAdapter<DiaryModel> {
   @override
   void write(BinaryWriter writer, DiaryModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(1)
       ..write(obj.id)
       ..writeByte(2)
@@ -56,7 +57,9 @@ class DiaryModelAdapter extends TypeAdapter<DiaryModel> {
       ..writeByte(10)
       ..write(obj.createAt)
       ..writeByte(11)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(12)
+      ..write(obj.mode);
   }
 
   @override

@@ -1,8 +1,11 @@
-import 'package:flutter/foundation.dart' as foundation;
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:diary_jonggack/common/responsive.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:diary_jonggack/common/check_validate.dart';
 import 'package:diary_jonggack/components/today_widget.dart';
@@ -11,7 +14,8 @@ import 'package:diary_jonggack/models/diary_models.dart';
 import 'package:get/get.dart';
 
 class AddDiaryScreen extends StatefulWidget {
-  const AddDiaryScreen({super.key});
+  AddDiaryScreen({super.key, this.diaryModel});
+  DiaryModel? diaryModel;
 
   @override
   State<AddDiaryScreen> createState() => _AddDiaryScreenState();
@@ -25,18 +29,31 @@ class _AddDiaryScreenState extends State<AddDiaryScreen> {
   late FocusNode _contentFocus;
   late FocusNode _content2Focus;
 
-  Emoji? selectedEmoji;
-  List<XFile>? images = null;
+  List<Uint8List>? imageBytesList;
+  String? selectedMode;
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   DiaryController diaryController = Get.find<DiaryController>();
   @override
   void initState() {
     super.initState();
+    print('widget.diaryModel : ${widget.diaryModel}');
 
-    titleEditingController = TextEditingController();
-    contentEditingController = TextEditingController();
-    content2EditingController = TextEditingController();
+    if (widget.diaryModel == null) {
+      titleEditingController = TextEditingController();
+      contentEditingController = TextEditingController();
+      content2EditingController = TextEditingController();
+    } else {
+      titleEditingController =
+          TextEditingController(text: widget.diaryModel!.title);
+      contentEditingController =
+          TextEditingController(text: widget.diaryModel!.content);
+      content2EditingController =
+          TextEditingController(text: widget.diaryModel!.content2);
+
+      imageBytesList = widget.diaryModel!.imageUrls;
+      selectedMode = widget.diaryModel!.mode;
+    }
 
     _titleFocus = FocusNode();
     _contentFocus = FocusNode();
@@ -56,9 +73,10 @@ class _AddDiaryScreenState extends State<AddDiaryScreen> {
   }
 
   void backSceen() async {
-    // FocusManager.instance.primaryFocus?.unfocus();
     Get.back();
   }
+
+  bool isLoadImages = false;
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +108,8 @@ class _AddDiaryScreenState extends State<AddDiaryScreen> {
                       title: titleEditingController.text,
                       content: contentEditingController.text,
                       content2: content2EditingController.text,
-                      imageUrls: images != null
-                          ? List.generate(
-                              images!.length, (index2) => images![index2].path)
-                          : null,
+                      imageUrls: imageBytesList,
+                      mode: selectedMode,
                     );
 
                     await diaryController.addDiary(diaryModel);
@@ -130,15 +146,14 @@ class _AddDiaryScreenState extends State<AddDiaryScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (selectedEmoji == null)
+                          if (selectedMode == null)
                             IconButton(
                               onPressed: () {
                                 Get.bottomSheet(SafeArea(
                                   child: EmojiPicker(
                                     onBackspacePressed: () => Get.back(),
                                     onEmojiSelected: (category, emoji) {
-                                      print('category : ${category}');
-                                      selectedEmoji = emoji;
+                                      selectedMode = emoji.emoji;
                                       setState(() {});
 
                                       Get.back();
@@ -146,40 +161,50 @@ class _AddDiaryScreenState extends State<AddDiaryScreen> {
                                   ),
                                 ));
                               },
-                              icon: Icon(Icons.tag_faces_sharp),
+                              icon: const Icon(Icons.tag_faces_sharp),
                             )
                           else
                             Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: Text(
-                                selectedEmoji!.emoji,
+                                selectedMode!,
                                 style: TextStyle(
                                     fontSize: Responsive.width10 * 2.2),
                               ),
                             ),
                           SizedBox(width: Responsive.width10 * 2.5),
-                          // IconButton(
-                          //     onPressed: () {},
-                          //     icon: Icon(Icons.wb_sunny_poutlined)),
-                          // SizedBox(width: Responsive.width10 * 2.5),
                           IconButton(
                             onPressed: () async {
+                              isLoadImages = true;
+                              setState(() {});
                               final ImagePicker _picker = ImagePicker();
+                              List<XFile>? images =
+                                  await _picker.pickMultiImage();
+                              imageBytesList = [];
 
-                              images = await _picker.pickMultiImage();
-                              if (images != null) {
-                                for (var image in images!) {
-                                  print(image.path);
-                                }
-                                setState(() {});
+                              for (var image in images!) {
+                                final imageFile = File(image.path);
+                                final imageBytes =
+                                    await imageFile.readAsBytes();
+                                imageBytesList!.add(imageBytes);
+                                print(image.path);
                               }
+                              isLoadImages = false;
+                              setState(() {});
                             },
                             icon: const Icon(Icons.camera_alt_outlined),
                           ),
                         ],
                       ),
                     ),
-                    if (images != null && images!.isNotEmpty)
+                    if (isLoadImages)
+                      Padding(
+                        padding: EdgeInsets.all(Responsive.height16 / 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    if (imageBytesList != null && imageBytesList!.isNotEmpty)
                       Padding(
                         padding:
                             EdgeInsets.only(bottom: Responsive.height16 / 2),
@@ -190,8 +215,29 @@ class _AddDiaryScreenState extends State<AddDiaryScreen> {
                             enlargeCenterPage: true,
                           ),
                           items: List.generate(
-                            images!.length,
-                            (index) => Image.asset(images![index].path),
+                            imageBytesList!.length,
+                            (index) => Stack(
+                              alignment: AlignmentDirectional.topEnd,
+                              children: [
+                                Image.memory(imageBytesList![index]),
+                                IconButton(
+                                  onPressed: () {
+                                    imageBytesList!.removeAt(index);
+                                    setState(() {});
+                                  },
+                                  // icon: Icon(
+                                  //   FontAwesomeIcons.close,
+                                  //   size: Responsive.width10 * 4,
+                                  //   color: Colors.red,
+                                  // ),
+                                  icon: Icon(
+                                    Icons.close,
+                                    size: Responsive.width10 * 3.5,
+                                    color: Colors.red,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),

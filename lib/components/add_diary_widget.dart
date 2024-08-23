@@ -11,7 +11,7 @@ class AddDiaryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => const AddDiaryScreen());
+        Get.to(() => AddDiaryScreen());
       },
       child: DottedBorder(
         borderType: BorderType.RRect,

@@ -1,22 +1,46 @@
+import 'dart:typed_data';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:diary_jonggack/common/responsive.dart';
 import 'package:diary_jonggack/components/today_widget.dart';
 import 'package:diary_jonggack/controller/diary_controller.dart';
 import 'package:diary_jonggack/models/diary_models.dart';
+import 'package:diary_jonggack/screens/add_diary_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/route_manager.dart';
 
 class DiaryDetailScreen extends StatelessWidget {
   const DiaryDetailScreen({super.key, required this.diary});
   final DiaryModel diary;
+
+  void _showFullScreenImage(BuildContext context, Uint8List image) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.all(0), // EdgeInsets.zero로 설정하여 다이얼로그 크기 조절
+          backgroundColor: Colors.transparent,
+          child: Image.memory(image, fit: BoxFit.cover),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     DiaryController diaryController = Get.find<DiaryController>();
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // 뒤로가기 버튼 제거
-        title: const TodayWidget(),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const TodayWidget(),
+            if (diary.mode != null) Text(diary.mode!)
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -30,15 +54,31 @@ class DiaryDetailScreen extends StatelessWidget {
                 diary.imageUrls!.length,
                 (index) {
                   if (index == 0) {
-                    return Hero(
-                      tag: diary.id,
-                      child: Image.asset(
-                        diary.imageUrls![index],
+                    return InkWell(
+                      onTap: () {
+                        _showFullScreenImage(
+                          context,
+                          diary.imageUrls![index],
+                        );
+                      },
+                      child: Hero(
+                        tag: diary.id,
+                        child: Image.memory(
+                          diary.imageUrls![index],
+                        ),
                       ),
                     );
                   }
-                  return Image.asset(
-                    diary.imageUrls![index],
+                  return InkWell(
+                    onTap: () {
+                      _showFullScreenImage(
+                        context,
+                        diary.imageUrls![index],
+                      );
+                    },
+                    child: Image.memory(
+                      diary.imageUrls![index],
+                    ),
                   );
                 },
               ),
@@ -46,7 +86,7 @@ class DiaryDetailScreen extends StatelessWidget {
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.all(Responsive.width16 / 2),
+                padding: EdgeInsets.all(Responsive.width16),
                 child: SizedBox(
                   width: double.infinity,
                   child: Column(
@@ -55,7 +95,7 @@ class DiaryDetailScreen extends StatelessWidget {
                       Text(
                         'Title',
                         style: TextStyle(
-                          fontFamily: 'IndieFlower',
+                          fontFamily: 'Roboto',
                           color: Colors.redAccent,
                           fontWeight: FontWeight.bold,
                           fontSize: Responsive.width20,
@@ -64,7 +104,7 @@ class DiaryDetailScreen extends StatelessWidget {
                       Text(
                         diary.title,
                         style: TextStyle(
-                          fontFamily: 'IndieFlower',
+                          fontFamily: 'Roboto',
                           fontSize: Responsive.height16,
                         ),
                       ),
@@ -72,7 +112,7 @@ class DiaryDetailScreen extends StatelessWidget {
                       Text(
                         'Content',
                         style: TextStyle(
-                          fontFamily: 'IndieFlower',
+                          fontFamily: 'Roboto',
                           color: Colors.redAccent,
                           fontWeight: FontWeight.bold,
                           fontSize: Responsive.width20,
@@ -81,7 +121,7 @@ class DiaryDetailScreen extends StatelessWidget {
                       Text(
                         diary.content,
                         style: TextStyle(
-                          fontFamily: 'IndieFlower',
+                          fontFamily: 'Roboto',
                           fontSize: Responsive.height16,
                         ),
                       ),
@@ -90,7 +130,7 @@ class DiaryDetailScreen extends StatelessWidget {
                         Text(
                           'Content2',
                           style: TextStyle(
-                            fontFamily: 'IndieFlower',
+                            fontFamily: 'Roboto',
                             color: Colors.redAccent,
                             fontWeight: FontWeight.bold,
                             fontSize: Responsive.width20,
@@ -99,7 +139,7 @@ class DiaryDetailScreen extends StatelessWidget {
                         Text(
                           diary.content2,
                           style: TextStyle(
-                            fontFamily: 'IndieFlower',
+                            fontFamily: 'Roboto',
                             fontSize: Responsive.height16,
                           ),
                         ),
@@ -154,7 +194,13 @@ class DiaryDetailScreen extends StatelessWidget {
                 if (result == null) {
                   return;
                 } else if (result == 'edit') {
-                  print('EDIT');
+                  print('aasd');
+
+                  Get.to(
+                    () => AddDiaryScreen(
+                      diaryModel: diary,
+                    ),
+                  );
                 } else if (result == 'delete') {
                   await diaryController.remoteDiary(diary);
                   Get.back();
